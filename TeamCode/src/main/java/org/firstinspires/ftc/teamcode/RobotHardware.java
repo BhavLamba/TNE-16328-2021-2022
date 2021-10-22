@@ -7,65 +7,28 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 
 public class RobotHardware {
 
     public BNO055IMU imu;
 
-    OpenCvInternalCamera webcam;
-    AutoCommon.SkystoneDeterminationPipeline pipeline;
 
     public DcMotor motorFL;
     public DcMotor motorFR;
     public DcMotor motorBL;
     public DcMotor motorBR;
 
-    public DcMotor motorIntake;
-    public DcMotor motorShooter;
-    public DcMotor motorAngle;
-    public DcMotor motorArm;
-
-    public Servo servoRingPush;
-    public Servo servoClamp;
-    public Servo servoHolder;
 
 
-    public static final double SHOOTER_AUTO_SPEED = -1;
-    public static final double SHOOTER_AUTO_DONE_SHOOT_TICKS = 800;
 
-    public static final double INTAKE_ROTATE = 5000;
-    public static final double INTAKE_AUTO_SPEED = 1;
-    public static final double INTAKE_ROTATION_AUTO_MS = 3000;
 
     public static final double WHEEL_DIAMETER = 4.0;
     public static final double DRIVE_MOTOR_TICKS_PER_ROTATION = 537.6;
 
-    public static final double ANGLE_AUTO_UP_SPEED = -0.2;
-    public static final double ANGLE_AUTO_DOWN_SPEED = 0.3;
-    public static final double ANGLE_SHOOT_HIGH_POS = 250;
-    public static final double ANGLE_SHOOT_POWER_POS = 150;
-    public static final double ANGLE_SHOOT_HIGH_AUTO_POS = 220;
 
 
-    public static final double ARM_AUTO_DOWN_SPEED_SLOW = -0.5;
-    public static final double ARM_AUTO_DOWN_SPEED_FAST = -1.0;
-    public static final double ARM_AUTO_DOWN_SLOW_TICKS = 500;
-    public static final double ARM_AUTO_UP_SPEED = 0.5;
 
-    public static final double CLAMP_CLOSE_POS = 0.52;
-    public static final double CLAMP_OPEN_POS = 0;
-
-    public static final double PUSH_IN_POS = 0.79;
-    public static final double PUSH_OUT_POS = 0.6;
-    public static final double PUSH_MOVE_IN_TIME_MS = 900;
-    public static final double PUSH_MOVE_OUT_TIME_MS = 130;
-
-    public static final double HOLD_HIGH_GOAL_POS = 0.96;
-    public static final double HOLD_HIGH_GOAL_CLOSE_POS = 0.92;
-    public static final double HOLD_ERECT_POS = 0.48;
-    public static final double HOLD_INIT_POS = 0.79;
 
     private HardwareMap hardwareMap = null;
 
@@ -98,32 +61,7 @@ public class RobotHardware {
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
 
-        motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
-        motorShooter.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        motorArm = hardwareMap.get(DcMotor.class, "motorArm");
-        motorArm.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        motorAngle = hardwareMap.get(DcMotor.class, "motorAngle");
-//        motorAngle.setDirection(DcMotorSimple.Direction.FORWARD);
-//        motorAngle.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorAngle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorAngle.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        servoClamp = hardwareMap.get(Servo.class, "servoClamp");
-        servoRingPush = hardwareMap.get(Servo.class, "servoPush");
-        servoHolder = hardwareMap.get(Servo.class, "servoHolder");
-        servoClamp.setPosition(CLAMP_CLOSE_POS);
-        servoRingPush.setPosition(PUSH_IN_POS);
-        servoHolder.setPosition(HOLD_INIT_POS);
 
     }
 
@@ -180,13 +118,7 @@ public class RobotHardware {
     }
 
 
-    public void setClaw(boolean isClose) {
-        if (isClose) {
-            servoClamp.setPosition(CLAMP_CLOSE_POS);
-        } else {
-            servoClamp.setPosition(CLAMP_OPEN_POS);
-        }
-    }
+
 
     public void resetDriveEncoders() {
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
