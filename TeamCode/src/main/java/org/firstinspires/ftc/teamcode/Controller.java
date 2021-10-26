@@ -37,17 +37,24 @@ public class Controller extends LinearOpMode {
 
 
     private void driveControl() {
-        double scale = 0.6;
+        double scale = 0.5;
         if (gamepad1.left_bumper) {
-            scale = 1.0;
+            scale = 0.8;
         } else if (gamepad1.left_trigger > 0.5) {
-            scale = 0.3;
+            scale = 0.1;
         }
 
-        double drive = -gamepad1.left_stick_y; // ?? why is this getting negated
+        double drive = gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
+        double turn = -gamepad1.right_stick_x;
         robot.startMove(drive, strafe, turn, scale);
+
+        telemetry.addData("BL pos", robot.motorBL.getCurrentPosition());
+        telemetry.addData("BR pos", robot.motorBR.getCurrentPosition());
+        telemetry.addData("FR pos", robot.motorFR.getCurrentPosition());
+        telemetry.addData("FL pos", robot.motorFL.getCurrentPosition());
+//        telemetry.addData("BL pos", robot.motorBL.getCurrentPosition());
+
     }
 }
 

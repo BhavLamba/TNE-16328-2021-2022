@@ -13,6 +13,7 @@ public class RobotHardware {
 
     public BNO055IMU imu;
 
+//    public DcMotor motorCarousel;
 
     public DcMotor motorFL;
     public DcMotor motorFR;
@@ -43,10 +44,10 @@ public class RobotHardware {
         motorFR = hardwareMap.get(DcMotor.class, "motorFR");
         motorBL = hardwareMap.get(DcMotor.class, "motorBL");
         motorBR = hardwareMap.get(DcMotor.class, "motorBR");
-        motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFR.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBL.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBR.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFL.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFR.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBR.setDirection(DcMotorSimple.Direction.REVERSE);
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -97,18 +98,16 @@ public class RobotHardware {
         double powerBL = (drive - strafe + turn) * scale;
         double powerBR = (drive + strafe - turn) * scale;
 
-        double maxPower = Math.max(Math.max(Math.abs(powerFL), Math.abs(powerFR)), Math.max(Math.abs(powerBL), Math.abs(powerBR))); // ?? Why are we using MAX function here.
+        double maxPower = Math.max(Math.max(Math.abs(powerFL), Math.abs(powerFR)), Math.max(Math.abs(powerBL), Math.abs(powerBR)));
         double max = (maxPower < 1) ? 1 : maxPower;
 
-        motorFL.setPower(Range.clip(powerFL / max, -1, 1));  // What does this clipping doing?
+        motorFL.setPower(Range.clip(powerFL / max, -1, 1));
         motorFR.setPower(Range.clip(powerFR / max, -1, 1));
         motorBL.setPower(Range.clip(powerBL / max, -1, 1));
         motorBR.setPower(Range.clip(powerBR / max, -1, 1));
     }
 
-    public void startMove(double drive, double strafe, double turn) {
-        startMove(drive, strafe, turn, 1);
-    }
+
 
     public void stopMove() {
         motorFL.setPower(0);
