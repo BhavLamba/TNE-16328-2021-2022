@@ -2,18 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 @TeleOp
-
+@Disabled
 public class Controller extends LinearOpMode {
 //    private DcMotor motorTest;
 //    private DigitalChannel digitalTouch;
@@ -78,7 +79,7 @@ public class Controller extends LinearOpMode {
         strafe = -drive * Math.sin(radians) + strafe * Math.cos(radians);
         drive = temp;
 
-        robot.startMove(drive, strafe, turn, scale);
+        robot.driveTrain.startMove(drive, strafe, turn, scale);
     }
 
     private void driveControl() {
@@ -92,13 +93,13 @@ public class Controller extends LinearOpMode {
         double drive = gamepad1.left_stick_y;
         double strafe = -gamepad1.left_stick_x;
         double turn = -gamepad1.right_stick_x;
-        robot.startMove(drive, strafe, turn, scale);
+        robot.driveTrain.startMove(drive, strafe, turn, scale);
 
-        telemetry.addData("BL pos", robot.motorBL.getCurrentPosition());
-        telemetry.addData("BR pos", robot.motorBR.getCurrentPosition());
-        telemetry.addData("FR pos", robot.motorFR.getCurrentPosition());
-        telemetry.addData("FL pos", robot.motorFL.getCurrentPosition());
-//        telemetry.addData("BL pos", robot.motorBL.getCurrentPosition());
+        telemetry.addData("BL pos", robot.driveTrain.motorBL.getCurrentPosition());
+        telemetry.addData("BR pos", robot.driveTrain.motorBR.getCurrentPosition());
+        telemetry.addData("FR pos", robot.driveTrain.motorFR.getCurrentPosition());
+        telemetry.addData("FL pos", robot.driveTrain.motorFL.getCurrentPosition());
+//        telemetry.addData("BL pos", robot.driveTrain.motorBL.getCurrentPosition());
 
     }
 

@@ -68,10 +68,10 @@ public class AutoCommon extends LinearOpMode {
 
         double encoderTicks = inchesToTicks(Math.abs(distance));
 
-        robot.resetDriveEncoders();
-        robot.startMove(1, 0, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.motorFL.getCurrentPosition()) < encoderTicks) ;
-        robot.stopMove();
+        robot.driveTrain.resetDriveEncoders();
+        robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
+        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) ;
+        robot.driveTrain.stopMove();
     }
 
     protected void driveOnHeading(double distance, double power, double targetHeading) {
@@ -80,13 +80,13 @@ public class AutoCommon extends LinearOpMode {
 
         double encoderTicks = inchesToTicks(Math.abs(distance));
 
-        robot.resetDriveEncoders();
-        robot.startMove(1, 0, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.motorFL.getCurrentPosition()) < encoderTicks) {
+        robot.driveTrain.resetDriveEncoders();
+        robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
+        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
-            robot.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
+            robot.driveTrain.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
         }
-        robot.stopMove();
+        robot.driveTrain.stopMove();
     }
 
     protected void driveOnHeadingRamp(double driveDistance, double minPower, double maxPower, double rampDistance, double targetHeading) {
@@ -96,16 +96,16 @@ public class AutoCommon extends LinearOpMode {
         double encoderTicks = inchesToTicks(Math.abs(driveDistance));
         double rampTicks = inchesToTicks(Math.abs(rampDistance));
 
-        robot.resetDriveEncoders();
-        robot.startMove(1, 0, 0, Math.abs(minPower) * dir);
-        while (opModeIsActive() && Math.abs(robot.motorFL.getCurrentPosition()) < encoderTicks) {
+        robot.driveTrain.resetDriveEncoders();
+        robot.driveTrain.startMove(1, 0, 0, Math.abs(minPower) * dir);
+        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
-            double startRampPower = minPower + (maxPower - minPower) * (Math.abs(robot.motorFL.getCurrentPosition()) / rampTicks);
-            double endRampPower = minPower + (maxPower - minPower) * (Math.abs(encoderTicks - robot.motorFL.getCurrentPosition()) / (rampTicks * 2));
+            double startRampPower = minPower + (maxPower - minPower) * (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) / rampTicks);
+            double endRampPower = minPower + (maxPower - minPower) * (Math.abs(encoderTicks - robot.driveTrain.motorFL.getCurrentPosition()) / (rampTicks * 2));
             double power = Range.clip(Math.min(startRampPower, endRampPower), minPower, maxPower);
-            robot.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
+            robot.driveTrain.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
         }
-        robot.stopMove();
+        robot.driveTrain.stopMove();
     }
 
 
@@ -115,28 +115,28 @@ public class AutoCommon extends LinearOpMode {
 
         double encoderTicks = inchesToTicks(Math.abs(distance));
 
-        robot.resetDriveEncoders();
-        robot.startMove(0, 1, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.motorFL.getCurrentPosition()) < encoderTicks) {
+        robot.driveTrain.resetDriveEncoders();
+        robot.driveTrain.startMove(0, 1, 0, Math.abs(power) * dir);
+        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
-            robot.startMove(0, Math.abs(power) * dir, Range.clip(turnMod, -0.2, 0.2), 1);
+            robot.driveTrain.startMove(0, Math.abs(power) * dir, Range.clip(turnMod, -0.2, 0.2), 1);
         }
-        robot.stopMove();
+        robot.driveTrain.stopMove();
     }
 
     protected void turnToHeading(double targetHeading, double power) {
         while (opModeIsActive() && Math.abs(getHeadingDiff(targetHeading)) > 6) {
-            robot.startMove(0, 0, 1, power * Math.signum(getHeadingDiff(targetHeading)));
+            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(getHeadingDiff(targetHeading)));
         }
-        robot.stopMove();
+        robot.driveTrain.stopMove();
     }
 /*
     protected void turnToHeading(double targetHeading) {
         while (opModeIsActive() && Math.abs(getHeadingDiff(targetHeading)) > 6) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
-            robot.startMove(0, 0, Range.clip(turnMod, -1.0, 1.0));
+            robot.driveTrain.startMove(0, 0, Range.clip(turnMod, -1.0, 1.0));
         }
-        robot.stopMove();
+        robot.driveTrain.stopMove();
     }
 /*
     protected void moveShooter (double shooterMove) {
@@ -176,7 +176,7 @@ public class AutoCommon extends LinearOpMode {
 
         robot.motorShooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.motorShooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.resetDriveEncoders();
+        robot.driveTrain.resetDriveEncoders();
 
         // start the shooter motor pre-emtively
         robot.motorShooter.setPower(robot.SHOOTER_AUTO_SPEED);

@@ -8,7 +8,5 @@ public class AutoTest extends AutoCommon {
     @Override
     public void runOpMode() {
         super.runOpMode();
-        robot.motorBR.setPower(-1);
-        sleep(30000);
     }
 }

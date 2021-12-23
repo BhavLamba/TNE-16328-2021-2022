@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -7,6 +9,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class RobotHardware {
@@ -15,10 +21,7 @@ public class RobotHardware {
 
 //    public DcMotor motorCarousel;
 
-    public DcMotor motorFL;
-    public DcMotor motorFR;
-    public DcMotor motorBL;
-    public DcMotor motorBR;
+    public DriveTrain driveTrain;
 
     public DcMotor motorIntake;
     public DcMotor motorSpinny;
@@ -50,32 +53,13 @@ public class RobotHardware {
     private HardwareMap hardwareMap = null;
 
     public RobotHardware(HardwareMap aHardwareMap, boolean initIMU) {
+        driveTrain = new DriveTrain(hardwareMap);
+
         hardwareMap = aHardwareMap;
 
         if (initIMU) {
             initializeIMU();
         }
-
-        motorFL = hardwareMap.get(DcMotor.class, "motorFL");
-        motorFR = hardwareMap.get(DcMotor.class, "motorFR");
-        motorBL = hardwareMap.get(DcMotor.class, "motorBL");
-        motorBR = hardwareMap.get(DcMotor.class, "motorBR");
-        motorFL.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFR.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBR.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorBL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         motorIntake.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -123,29 +107,6 @@ public class RobotHardware {
         imu.initialize(parameters);
     }
 
-    public void startMove(double drive, double strafe, double turn, double scale) {
-        double powerFL = (drive + strafe + turn) * scale;
-        double powerFR = (drive - strafe - turn) * scale;
-        double powerBL = (drive - strafe + turn) * scale;
-        double powerBR = (drive + strafe - turn) * scale;
-
-        double maxPower = Math.max(Math.max(Math.abs(powerFL), Math.abs(powerFR)), Math.max(Math.abs(powerBL), Math.abs(powerBR)));
-        double max = (maxPower < 1) ? 1 : maxPower;
-
-        motorFL.setPower(Range.clip(powerFL / max, -1, 1));
-        motorFR.setPower(Range.clip(powerFR / max, -1, 1));
-        motorBL.setPower(Range.clip(powerBL / max, -1, 1));
-        motorBR.setPower(Range.clip(powerBR / max, -1, 1));
-    }
-
-
-
-    public void stopMove() {
-        motorFL.setPower(0);
-        motorFR.setPower(0);
-        motorBL.setPower(0);
-        motorBR.setPower(0);
-    }
 
     public void setDrop(boolean isClose) {
         if (isClose) {
@@ -157,18 +118,69 @@ public class RobotHardware {
         }
     }
 
-    public void resetDriveEncoders() {
-        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public class DriveTrain {
+        public DcMotor motorFL;
+        public DcMotor motorFR;
+        public DcMotor motorBL;
+        public DcMotor motorBR;
+        public DcMotor[] motors;
 
-        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        public DriveTrain(HardwareMap hardwareMap) {
+            motorFL = hardwareMap.get(DcMotor.class, "motorFL");
+            motorFR = hardwareMap.get(DcMotor.class, "motorFR");
+            motorBL = hardwareMap.get(DcMotor.class, "motorBL");
+            motorBR = hardwareMap.get(DcMotor.class, "motorBR");
+            motors = new DcMotor[]{motorFL, motorFR, motorBL, motorBR};
+
+
+            motorFL.setDirection(DcMotorSimple.Direction.FORWARD);
+            motorFR.setDirection(DcMotorSimple.Direction.REVERSE);
+            motorBL.setDirection(DcMotorSimple.Direction.FORWARD);
+            motorBR.setDirection(DcMotorSimple.Direction.REVERSE);
+
+            for (DcMotor motor : motors) {
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+        }
+
+        public void startMove(double drive, double strafe, double turn, double scale) {
+            double powerFL = (drive + strafe + turn) * scale;
+            double powerFR = (drive - strafe - turn) * scale;
+            double powerBL = (drive - strafe + turn) * scale;
+            double powerBR = (drive + strafe - turn) * scale;
+
+            double maxPower = Math.max(Math.max(Math.abs(powerFL), Math.abs(powerFR)), Math.max(Math.abs(powerBL), Math.abs(powerBR)));
+            double max = (maxPower < 1) ? 1 : maxPower;
+
+            motorFL.setPower(Range.clip(powerFL / max, -1, 1));
+            motorFR.setPower(Range.clip(powerFR / max, -1, 1));
+            motorBL.setPower(Range.clip(powerBL / max, -1, 1));
+            motorBR.setPower(Range.clip(powerBR / max, -1, 1));
+        }
+
+        public void stopMove() {
+            for (DcMotor motor: motors) {
+                motor.setPower(0);
+            }
+        }
+
+        public void resetDriveEncoders() {
+            for (DcMotor motor: motors) {
+                motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+        }
+
+        public void telemetryUpdate(Telemetry telemetry) {
+            telemetry.addData("BL pos", motorBL.getCurrentPosition());
+            telemetry.addData("BR pos", motorBR.getCurrentPosition());
+            telemetry.addData("FR pos", motorFR.getCurrentPosition());
+            telemetry.addData("FL pos", driveTrain.motorFL.getCurrentPosition());
+        }
     }
 }
 
