@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -37,18 +38,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 @TeleOp
-public class ControllerRewrite extends OpMode
+public class ArmTest extends OpMode
 {
-    RobotHardware robot;
-    Toggle intake;
+
+    RobotHardware.Arm arm;
+
+    @Config
+    public static class Constants {
+        public static double servo_pos = 0.0;
+    }
 
 
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        robot = new RobotHardware(hardwareMap, false);
-        intake = new Toggle(robot.motorIntake, 0.6);
+        arm = new RobotHardware.Arm(hardwareMap);
+
+        arm.motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -69,52 +76,24 @@ public class ControllerRewrite extends OpMode
 
     @Override
     public void loop() {
-        driveControl();
-        intakeControl();
-        carouselControl();
-        armControl();
+//        armControl();
+        telemetry.addData("Motor Encoder Output", arm.motorArm.getCurrentPosition());
+        telemetry.addData("Servo Position", arm.servoArm.getPosition());
+        arm.servoArm.setPosition(Constants.servo_pos);
+
     }
 
-    private void driveControl() {
-        double scale = 0.5;
-        if (gamepad1.left_bumper) {
-            scale = 0.8;
-        } else if (gamepad1.left_trigger > 0.5) {
-            scale = 0.1;
-        }
-
-        double drive = gamepad1.left_stick_y;
-        double strafe = -gamepad1.left_stick_x;
-        double turn = -gamepad1.right_stick_x;
-        robot.driveTrain.startMove(drive, strafe, turn, scale);
-
-        robot.driveTrain.telemetryUpdate(telemetry);
-    }
-
-    private void intakeControl() {
-        intake.monitor(gamepad1.dpad_right);
-    }
-
-    private void carouselControl() {
-        if (gamepad1.dpad_up) {
-            robot.motorSpinny.setPower(0.5);
-        } else if (gamepad1.dpad_down) {
-            robot.motorSpinny.setPower(-0.5);
-        } else {
-            robot.motorSpinny.setPower(0);
-        }
-    }
 
     private void armControl() {
-        if (gamepad1.y) {
-            robot.arm.up();
-        }
-
-        if (gamepad1.b) {
-            robot.arm.down();
-        }
-
-        robot.arm.run();
+//        if (gamepad1.y) {
+//            arm.up();
+//        }
+//
+//        if (gamepad1.b) {
+//            arm.down();
+//        }
+//
+//        arm.run();
     }
 
     /*
@@ -124,32 +103,5 @@ public class ControllerRewrite extends OpMode
     public void stop() {
     }
 
-    private class Toggle {
-        boolean value = false;
-        boolean lastPress = false;
-        double power;
-        DcMotor motor;
-
-        private Toggle(DcMotor setMotor, double setPower) {
-            motor = setMotor;
-            power = setPower;
-        }
-
-        private void monitor(boolean input) {
-            if (input && !lastPress) {
-                value = !value;
-            }
-            lastPress = input;
-            if (value) {
-                motor.setPower(power);
-            } else {
-                motor.setPower(0);
-            }
-        }
-
-        private void swap() {
-            value = !value;
-        }
-    }
 
 }

@@ -1,18 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import java.util.HashMap;
-import java.util.Iterator;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 public class RobotHardware {
@@ -22,14 +21,12 @@ public class RobotHardware {
 //    public DcMotor motorCarousel;
 
     public DriveTrain driveTrain;
+    public Arm arm;
 
     public DcMotor motorIntake;
     public DcMotor motorSpinny;
 
-    public Servo servoRArm;
-    public Servo servoLArm;
-    public Servo servoFlicker;
-    public Servo servoRotate;
+
 
     public static final double WHEEL_DIAMETER = 6.0;
     public static final double DRIVE_MOTOR_TICKS_PER_ROTATION = 385.5; //changing from 537.6
@@ -53,9 +50,10 @@ public class RobotHardware {
     private HardwareMap hardwareMap = null;
 
     public RobotHardware(HardwareMap aHardwareMap, boolean initIMU) {
-        driveTrain = new DriveTrain(hardwareMap);
-
         hardwareMap = aHardwareMap;
+
+        driveTrain = new DriveTrain(hardwareMap);
+        arm = new Arm(hardwareMap);
 
         if (initIMU) {
             initializeIMU();
@@ -72,13 +70,6 @@ public class RobotHardware {
         motorSpinny.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorSpinny.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorSpinny.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        servoLArm = hardwareMap.get(Servo.class, "servoLArm");
-        servoRArm = hardwareMap.get(Servo.class, "servoRArm");
-        servoFlicker = hardwareMap.get(Servo.class, "servoFlicker");
-        servoRotate = hardwareMap.get(Servo.class, "servoRotate");
-        servoLArm.setPosition(SERVO_LEFT_PICKUP_POS);
-        servoRArm.setPosition(SERVO_RIGHT_TOP_POS);
     }
 
     public void initializeIMU() {
@@ -107,15 +98,49 @@ public class RobotHardware {
         imu.initialize(parameters);
     }
 
+    @Config
+    public static class Arm {
+        public DcMotor motorArm;
+        public Servo servoArm;
 
-    public void setDrop(boolean isClose) {
-        if (isClose) {
-//            servoRotate.setPosition(SERVO_ROTATE_DODGE_MOTOR_POS);
-            servoFlicker.setPosition(SERVO_FLICKER_CLOSE_POS);
-        } else {
-//            servoRotate.setPosition(SERVO_ROTATE_DROP_POS);
-            servoFlicker.setPosition(SERVO_FLCIKER_OPEN_POS);
+//        PIDController pidController;
+
+        public static double KP = 0.0;
+        public static double KI = 0.0;
+        public static double KD = 0.0;
+        public static int MOTOR_TOP = 0;
+        public static int MOTOR_BOTTOM = 0;
+        public static int SERVO_TOP = 0;
+        public static int SERVO_BOTTOM = 0;
+
+
+        public Arm(HardwareMap hardwareMap) {
+            motorArm = hardwareMap.get(DcMotor.class, "motorArm");
+
+            motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
+            motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+//            pidController = new PIDController(KP, KI, KD, motorArm);
         }
+
+//        public void up() {
+//            pidController.setReference(MOTOR_TOP);
+//        }
+
+//        public void down() {
+//            pidController.setReference(MOTOR_BOTTOM);
+//        }
+
+//        public void run() {
+//            pidController.run();
+//            servoArm.setPosition(
+//                (motorArm.getCurrentPosition() - MOTOR_BOTTOM)
+//                * ((double) (SERVO_TOP - SERVO_BOTTOM) / (double) (MOTOR_TOP - MOTOR_BOTTOM))
+//            );
+//        }
+
     }
 
     public class DriveTrain {
@@ -142,8 +167,8 @@ public class RobotHardware {
 
             for (DcMotor motor : motors) {
                 motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
         }
 
@@ -181,6 +206,24 @@ public class RobotHardware {
             telemetry.addData("FR pos", motorFR.getCurrentPosition());
             telemetry.addData("FL pos", driveTrain.motorFL.getCurrentPosition());
         }
+    }
+
+    public static class Sensors {
+        public DistanceSensor colorSensor;
+
+        public Sensors(HardwareMap hardwareMap) {
+            colorSensor = hardwareMap.get(DistanceSensor.class, "sensorColor");
+        }
+
+        public void telemetryUpdate(Telemetry telemetry) {
+            telemetry.addData("Color Distance", colorSensor.getDistance(DistanceUnit.INCH));
+
+        }
+    }
+
+    public class Extra {
+        public DcMotor motorIntake;
+        public DcMotor motorCarosel;
     }
 }
 
