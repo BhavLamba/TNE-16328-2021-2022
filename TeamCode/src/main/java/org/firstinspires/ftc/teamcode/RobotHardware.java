@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -103,43 +102,62 @@ public class RobotHardware {
         public DcMotor motorArm;
         public Servo servoArm;
 
-//        PIDController pidController;
+        PIDController pidController;
 
         public static double KP = 0.0;
         public static double KI = 0.0;
         public static double KD = 0.0;
-        public static int MOTOR_TOP = 0;
+        public static int MOTOR_TOP = 446;
         public static int MOTOR_BOTTOM = 0;
-        public static int SERVO_TOP = 0;
-        public static int SERVO_BOTTOM = 0;
+        public static double SERVO_TOP = 0.1;
+        public static double SERVO_BOTTOM = 0.5;
 
 
         public Arm(HardwareMap hardwareMap) {
             motorArm = hardwareMap.get(DcMotor.class, "motorArm");
 
-            motorArm.setDirection(DcMotorSimple.Direction.FORWARD);
+            motorArm.setDirection(DcMotorSimple.Direction.REVERSE);
             motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-//            pidController = new PIDController(KP, KI, KD, motorArm);
+            servoArm = hardwareMap.get(Servo.class, "servoArm");
+            servoArm.setDirection(Servo.Direction.REVERSE);
+            servoArm.setPosition(SERVO_BOTTOM);
+
+            pidController = new PIDController(KP, KI, KD, motorArm);
         }
 
-//        public void up() {
-//            pidController.setReference(MOTOR_TOP);
-//        }
+        public void up() {
+//            pidController.reference = MOTOR_TOP;
+            motorArm.setTargetPosition(MOTOR_TOP);
+            motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motorArm.setPower(0.2);
+        }
 
-//        public void down() {
-//            pidController.setReference(MOTOR_BOTTOM);
-//        }
+        public void down() {
+//            pidController.reference = MOTOR_BOTTOM;
+            motorArm.setTargetPosition(MOTOR_BOTTOM);
+            motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motorArm.setPower(0.2);
 
-//        public void run() {
-//            pidController.run();
+        }
+
+        public void run(Telemetry telemetry) {
 //            servoArm.setPosition(
 //                (motorArm.getCurrentPosition() - MOTOR_BOTTOM)
-//                * ((double) (SERVO_TOP - SERVO_BOTTOM) / (double) (MOTOR_TOP - MOTOR_BOTTOM))
+//                * ((double) (SERVO_TOP - SERVO_BOTTOM) / (double) (MOTOR_TOP - MOTOR_BOTTOM)) + SERVO_BOTTOM
 //            );
-//        }
+//            servoArm.setPosition(
+//                    (motorArm.getTargetPosition() - motorArm.getCurrentPosition()) /  (double) MOTOR_TOP * (SERVO_TOP - SERVO_BOTTOM) + SERVO_BOTTOM
+//            );
+            double position = -((MOTOR_TOP - motorArm.getCurrentPosition())/ (double) MOTOR_TOP - 1) * (SERVO_TOP - SERVO_BOTTOM) + SERVO_BOTTOM;
+
+            servoArm.setPosition(position);
+//            servoArm.setPosition(Range.clip(position, SERVO_BOTTOM, SERVO_TOP));
+
+            telemetry.addData("Servo Target", position);
+        }
 
     }
 

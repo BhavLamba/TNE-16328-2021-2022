@@ -114,7 +114,7 @@ public class ControllerRewrite extends OpMode
             robot.arm.down();
         }
 
-        robot.arm.run();
+        robot.arm.run(telemetry);
     }
 
     /*
