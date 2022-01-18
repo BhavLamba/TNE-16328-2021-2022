@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 @TeleOp
-public class ArmTest extends OpMode
+public class ArmProgram extends OpMode
 {
 
     RobotHardware.Arm arm;
@@ -55,6 +55,7 @@ public class ArmTest extends OpMode
 
         arm = new RobotHardware.Arm(hardwareMap);
 
+        arm.motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -70,31 +71,17 @@ public class ArmTest extends OpMode
     public void start() {
         telemetry.addData("Status", "Running");
 
-
     }
 
 
     @Override
     public void loop() {
-//        armControl();
         telemetry.addData("Motor Encoder Output", arm.motorArm.getCurrentPosition());
         telemetry.addData("Servo Position", arm.servoArm.getPosition());
-        arm.servoArm.setPosition(ArmProgram.Constants.servo_pos);
+        arm.servoArm.setPosition(Constants.servo_pos);
 
     }
 
-
-//    private void armControl() {
-//        if (gamepad1.y) {
-//            arm.up();
-//        }
-//
-//        if (gamepad1.b) {
-//            arm.down();
-//        }
-//        telemetry.addData("target", arm.motorArm.getTargetPosition());
-//        arm.run(gamepad1.right_bumper);
-//    }
 
     /*
      * Code to run ONCE after the driver hits STOP

@@ -23,7 +23,7 @@ public class RobotHardware {
     public Arm arm;
 
     public DcMotor motorIntake;
-    public DcMotor motorSpinny;
+    public DcMotor motorCarousel;
 
 
 
@@ -59,16 +59,16 @@ public class RobotHardware {
         }
 
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
-        motorIntake.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         motorIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motorSpinny = hardwareMap.get(DcMotor.class, "motorSpinny");
-        motorSpinny.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorSpinny.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSpinny.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorSpinny.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorCarousel = hardwareMap.get(DcMotor.class, "motorCarousel");
+        motorCarousel.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorCarousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorCarousel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorCarousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void initializeIMU() {
@@ -102,15 +102,19 @@ public class RobotHardware {
         public DcMotor motorArm;
         public Servo servoArm;
 
-        PIDController pidController;
+        public static double POWER = 1.0;
 
-        public static double KP = 0.0;
-        public static double KI = 0.0;
-        public static double KD = 0.0;
-        public static int MOTOR_TOP = 446;
+        public static int MOTOR_TOP_HUB_POSITION = 610;
+        public static int MOTOR_MID_HUB_POSITION = 610;
+        public int MOTOR_TOP = MOTOR_TOP_HUB_POSITION;
         public static int MOTOR_BOTTOM = 0;
-        public static double SERVO_TOP = 0.1;
-        public static double SERVO_BOTTOM = 0.5;
+
+        public static double SERVO_TOP_HUB_POSITION = 0.2;
+        public static double SERVO_MID_HUB_POSITION = 0.2;
+        public double SERVO_TOP = SERVO_TOP_HUB_POSITION;
+        public static double SERVO_BOTTOM = 0.65;
+
+        public static double SERVO_DROP = 0.0;
 
 
         public Arm(HardwareMap hardwareMap) {
@@ -124,39 +128,48 @@ public class RobotHardware {
             servoArm = hardwareMap.get(Servo.class, "servoArm");
             servoArm.setDirection(Servo.Direction.REVERSE);
             servoArm.setPosition(SERVO_BOTTOM);
-
-            pidController = new PIDController(KP, KI, KD, motorArm);
         }
 
         public void up() {
-//            pidController.reference = MOTOR_TOP;
             motorArm.setTargetPosition(MOTOR_TOP);
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorArm.setPower(0.2);
+            motorArm.setPower(POWER);
         }
 
         public void down() {
-//            pidController.reference = MOTOR_BOTTOM;
             motorArm.setTargetPosition(MOTOR_BOTTOM);
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorArm.setPower(0.2);
+            motorArm.setPower(POWER);
 
         }
 
-        public void run(Telemetry telemetry) {
-//            servoArm.setPosition(
-//                (motorArm.getCurrentPosition() - MOTOR_BOTTOM)
-//                * ((double) (SERVO_TOP - SERVO_BOTTOM) / (double) (MOTOR_TOP - MOTOR_BOTTOM)) + SERVO_BOTTOM
-//            );
-//            servoArm.setPosition(
-//                    (motorArm.getTargetPosition() - motorArm.getCurrentPosition()) /  (double) MOTOR_TOP * (SERVO_TOP - SERVO_BOTTOM) + SERVO_BOTTOM
-//            );
+        public void run(boolean Drop) {
             double position = -((MOTOR_TOP - motorArm.getCurrentPosition())/ (double) MOTOR_TOP - 1) * (SERVO_TOP - SERVO_BOTTOM) + SERVO_BOTTOM;
 
-            servoArm.setPosition(position);
-//            servoArm.setPosition(Range.clip(position, SERVO_BOTTOM, SERVO_TOP));
+            if (Drop) {
+                position = SERVO_DROP;
+            }
 
-            telemetry.addData("Servo Target", position);
+            servoArm.setPosition(position);
+        }
+
+        public void setTargetLevel(Level level) {
+            switch (level) {
+                case TOP:
+                    MOTOR_TOP = MOTOR_TOP_HUB_POSITION;
+                    SERVO_TOP = SERVO_TOP_HUB_POSITION;
+                    break;
+                case MIDDLE:
+                    MOTOR_TOP = MOTOR_MID_HUB_POSITION;
+                    SERVO_TOP = SERVO_MID_HUB_POSITION;
+                    break;
+            }
+        }
+
+        enum Level {
+            TOP,
+            MIDDLE,
+            BOTTOM
         }
 
     }
@@ -237,11 +250,6 @@ public class RobotHardware {
             telemetry.addData("Color Distance", colorSensor.getDistance(DistanceUnit.INCH));
 
         }
-    }
-
-    public class Extra {
-        public DcMotor motorIntake;
-        public DcMotor motorCarosel;
     }
 }
 

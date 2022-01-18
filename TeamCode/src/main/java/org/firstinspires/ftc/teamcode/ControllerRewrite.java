@@ -31,9 +31,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 
 @TeleOp
@@ -48,7 +53,7 @@ public class ControllerRewrite extends OpMode
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         robot = new RobotHardware(hardwareMap, false);
-        intake = new Toggle(robot.motorIntake, 0.6);
+        intake = new Toggle(robot.motorIntake, 1);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -72,12 +77,23 @@ public class ControllerRewrite extends OpMode
         driveControl();
         intakeControl();
         carouselControl();
-        armControl();
+//        armControl();
+        manualArmControl();
+//        dashboardTelemetry();
     }
+
+//    private void dashboardTelemetry() {
+//        Position position = robot.imu.getPosition();
+//        position = position.toUnit(DistanceUnit.INCH);
+//        TelemetryPacket packet = new TelemetryPacket();
+//        packet.fieldOverlay().fillRect(position.x, position.y, 18, 18);
+//        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//    }
 
     private void driveControl() {
         double scale = 0.5;
         if (gamepad1.left_bumper) {
+            gamepad1.rumble(500);
             scale = 0.8;
         } else if (gamepad1.left_trigger > 0.5) {
             scale = 0.1;
@@ -96,13 +112,8 @@ public class ControllerRewrite extends OpMode
     }
 
     private void carouselControl() {
-        if (gamepad1.dpad_up) {
-            robot.motorSpinny.setPower(0.5);
-        } else if (gamepad1.dpad_down) {
-            robot.motorSpinny.setPower(-0.5);
-        } else {
-            robot.motorSpinny.setPower(0);
-        }
+        robot.motorCarousel.setPower(-gamepad1.right_trigger);
+        telemetry.addData("speed", gamepad1.right_trigger);
     }
 
     private void armControl() {
@@ -114,7 +125,19 @@ public class ControllerRewrite extends OpMode
             robot.arm.down();
         }
 
-        robot.arm.run(telemetry);
+
+
+        robot.arm.run(gamepad1.right_bumper);
+    }
+
+    public void manualArmControl() {
+        if (gamepad1.y) {
+            robot.arm.motorArm.setPower(0.1);
+        } else if (gamepad1.b) {
+            robot.arm.motorArm.setPower(-0.1);
+        } else {
+            robot.arm.motorArm.setPower(0);
+        }
     }
 
     /*
