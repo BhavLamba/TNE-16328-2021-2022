@@ -77,18 +77,10 @@ public class ControllerRewrite extends OpMode
         driveControl();
         intakeControl();
         carouselControl();
-//        armControl();
-        manualArmControl();
-//        dashboardTelemetry();
+        armControl();
+//        manualArmControl();
     }
 
-//    private void dashboardTelemetry() {
-//        Position position = robot.imu.getPosition();
-//        position = position.toUnit(DistanceUnit.INCH);
-//        TelemetryPacket packet = new TelemetryPacket();
-//        packet.fieldOverlay().fillRect(position.x, position.y, 18, 18);
-//        FtcDashboard.getInstance().sendTelemetryPacket(packet);
-//    }
 
     private void driveControl() {
         double scale = 0.5;
@@ -108,7 +100,10 @@ public class ControllerRewrite extends OpMode
     }
 
     private void intakeControl() {
-        intake.monitor(gamepad1.dpad_right);
+        telemetry.addData("distance", robot.distanceSensor.getDistance(DistanceUnit.CM));
+//        intake.monitor(gamepad1.dpad_right);
+//        intake.monitor(robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.3);
+        robot.motorIntake.setPower((robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.0 )? 1 : 0);
     }
 
     private void carouselControl() {

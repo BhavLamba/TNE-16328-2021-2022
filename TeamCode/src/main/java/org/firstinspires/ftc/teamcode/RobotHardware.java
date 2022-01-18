@@ -25,24 +25,12 @@ public class RobotHardware {
     public DcMotor motorIntake;
     public DcMotor motorCarousel;
 
+    public DistanceSensor distanceSensor;
+
 
 
     public static final double WHEEL_DIAMETER = 6.0;
     public static final double DRIVE_MOTOR_TICKS_PER_ROTATION = 385.5; //changing from 537.6
-
-    public static final double SERVO_RIGHT_PICKUP_POS = 0.765;
-    public static final double SERVO_LEFT_PICKUP_POS = 0.115;
-    public static final double SERVO_RIGHT_TOP_POS = 0.08;
-    public static final double SERVO_LEFT_TOP_POS = 0.85;
-    public static final double SERVO_RIGHT_INIT_POS = 0.05;
-    public static final double SERVO_LEFT_INIT_POS = 0.8;
-    public static final double SERVO_FLICKER_INIT_POS = 0;
-    public static final double SERVO_FLCIKER_OPEN_POS = 0.14;
-    public static final double SERVO_FLICKER_CLOSE_POS = 0.31;
-    public static final double SERVO_ROTATE_INIT_POS = 0.49;
-    public static final double SERVO_ROTATE_DODGE_MOTOR_POS = 0.13;
-    public static final double SERVO_ROTATE_PICKUP_POS = 0.53;
-    public static final double SERVO_ROTATE_DROP_POS = 0.6;
 
 
 
@@ -69,6 +57,10 @@ public class RobotHardware {
         motorCarousel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorCarousel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorCarousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "sensorDistance");
+
+
     }
 
     public void initializeIMU() {
@@ -102,19 +94,22 @@ public class RobotHardware {
         public DcMotor motorArm;
         public Servo servoArm;
 
-        public static double POWER = 1.0;
+        public static double POWER = 0.2;
 
-        public static int MOTOR_TOP_HUB_POSITION = 610;
-        public static int MOTOR_MID_HUB_POSITION = 610;
+        public static int MOTOR_TOP_HUB_POSITION = 615;
+        public static int MOTOR_BOT_HUB_POSITION = 835;
         public int MOTOR_TOP = MOTOR_TOP_HUB_POSITION;
         public static int MOTOR_BOTTOM = 0;
+        public static int MOTOR_HOVER = 100;
 
-        public static double SERVO_TOP_HUB_POSITION = 0.2;
-        public static double SERVO_MID_HUB_POSITION = 0.2;
+
+        public static double SERVO_TOP_HUB_POSITION = 0.35;
+        public static double SERVO_BOT_HUB_POSITION = 0.15;
         public double SERVO_TOP = SERVO_TOP_HUB_POSITION;
-        public static double SERVO_BOTTOM = 0.65;
+        public static double SERVO_BOTTOM = 0.9;
+        public static double SERVO_HOVER = 0.8;
 
-        public static double SERVO_DROP = 0.0;
+        public static double SERVO_DROP_OFFSET = 0.15;
 
 
         public Arm(HardwareMap hardwareMap) {
@@ -133,21 +128,25 @@ public class RobotHardware {
         public void up() {
             motorArm.setTargetPosition(MOTOR_TOP);
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorArm.setPower(POWER);
+            motorArm.setPower(0.3);
         }
 
         public void down() {
             motorArm.setTargetPosition(MOTOR_BOTTOM);
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorArm.setPower(POWER);
+            motorArm.setPower(0.05);
 
         }
 
         public void run(boolean Drop) {
             double position = -((MOTOR_TOP - motorArm.getCurrentPosition())/ (double) MOTOR_TOP - 1) * (SERVO_TOP - SERVO_BOTTOM) + SERVO_BOTTOM;
 
+            if (50 > motorArm.getCurrentPosition() && motorArm.getCurrentPosition() > 150) {
+                servoArm.setPosition(0.7);
+            }
+
             if (Drop) {
-                position = SERVO_DROP;
+                position += SERVO_DROP_OFFSET;
             }
 
             servoArm.setPosition(position);
@@ -160,8 +159,8 @@ public class RobotHardware {
                     SERVO_TOP = SERVO_TOP_HUB_POSITION;
                     break;
                 case MIDDLE:
-                    MOTOR_TOP = MOTOR_MID_HUB_POSITION;
-                    SERVO_TOP = SERVO_MID_HUB_POSITION;
+                    MOTOR_TOP = MOTOR_BOT_HUB_POSITION;
+                    SERVO_TOP = SERVO_BOT_HUB_POSITION;
                     break;
             }
         }
