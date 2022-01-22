@@ -48,12 +48,9 @@ public class ArmProgram extends OpMode
 
     @Config
     public static class Constants {
-        public static double servo_pos = 0.65;
+        public static double servo_pos = 0.9;
+        public static double flicker_pos = 0.5;
 
-
-        public void logBehavior(Telemetry telemetry) {
-            telemetry.addData("Servo Target", Constants.servo_pos);
-        }
     }
 
 
@@ -65,7 +62,6 @@ public class ArmProgram extends OpMode
 
         arm.motorArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        constants = new Constants();
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
@@ -87,8 +83,8 @@ public class ArmProgram extends OpMode
     public void loop() {
         telemetry.addData("Motor Encoder Output", arm.motorArm.getCurrentPosition());
         telemetry.addData("Servo Position", arm.servoArm.getPosition());
-        constants.logBehavior(telemetry);
         arm.servoArm.setPosition(Constants.servo_pos);
+        arm.servoFlicker.setPosition(Constants.flicker_pos);
 
     }
 

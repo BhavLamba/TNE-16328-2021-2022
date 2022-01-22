@@ -88,7 +88,7 @@ public class ArmTest extends OpMode
             arm.down();
         }
         telemetry.addData("target", arm.motorArm.getTargetPosition());
-        arm.run(gamepad1.right_bumper);
+//        arm.run(gamepad1.right_bumper);
     }
 
     /*

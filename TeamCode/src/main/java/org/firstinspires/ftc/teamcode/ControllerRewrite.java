@@ -35,6 +35,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -46,6 +47,7 @@ public class ControllerRewrite extends OpMode
 {
     RobotHardware robot;
     Toggle intake;
+    ElapsedTime runtime;
 
 
     @Override
@@ -69,6 +71,7 @@ public class ControllerRewrite extends OpMode
     public void start() {
         telemetry.addData("Status", "Running");
 
+
     }
 
 
@@ -78,6 +81,7 @@ public class ControllerRewrite extends OpMode
         intakeControl();
         carouselControl();
         armControl();
+//        servoArmControl();
 //        manualArmControl();
     }
 
@@ -101,13 +105,37 @@ public class ControllerRewrite extends OpMode
 
     private void intakeControl() {
         telemetry.addData("distance", robot.distanceSensor.getDistance(DistanceUnit.CM));
-//        intake.monitor(gamepad1.dpad_right);
-//        intake.monitor(robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.3);
-        robot.motorIntake.setPower((robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.0 )? 1 : 0);
+        intake.monitor(gamepad1.dpad_right);
+// may be moves to run off servo pos instead of color sensor, it gets wonky
+        if (robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.0) {
+            robot.motorIntake.setPower(1);
+        }
+//        else if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8.0) {
+//            robot.motorIntake.setPower(0);
+//        }
+        else {
+            if (robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
+                robot.arm.hover();
+            }
+            robot.motorIntake.setPower(0);
+        }
     }
 
+    private void newIntakeControl() {
+
+    }
     private void carouselControl() {
-        robot.motorCarousel.setPower(-gamepad1.right_trigger);
+        if (gamepad1.right_trigger > 0.3) {
+            robot.motorCarousel.setPower(-0.075);
+        } else if (gamepad1.left_trigger > 0.3 && robot.driveTrain.motorFL.getPower() == 0) {
+            robot.motorCarousel.setPower(0.1);
+        } else if (gamepad1.left_trigger > 0.3 && gamepad1.right_trigger > 0.3) {
+            robot.motorCarousel.setPower(-0.1);
+        } else {
+            robot.motorCarousel.setPower(0);
+        }
+
+//        robot.motorCarousel.setPower(-gamepad1.right_trigger);
         telemetry.addData("speed", gamepad1.right_trigger);
     }
 
@@ -115,25 +143,52 @@ public class ControllerRewrite extends OpMode
         if (gamepad1.y) {
             robot.arm.up();
         }
-
         if (gamepad1.b) {
             robot.arm.down();
         }
 
+        if (gamepad1.right_bumper) {
+            robot.arm.drop();
+        }
 
+        robot.arm.run();
+        telemetry.addData("motorArm pos", robot.arm.motorArm.getCurrentPosition());
+        telemetry.addData("servoArm pos", robot.arm.servoArm.getPosition());
+        telemetry.addData("flicker pos", robot.arm.servoFlicker.getPosition());
 
-        robot.arm.run(gamepad1.right_bumper);
+        telemetry.addData("state", robot.arm.currentState);
     }
 
     public void manualArmControl() {
-        if (gamepad1.y) {
+        if (gamepad2.y) {
             robot.arm.motorArm.setPower(0.1);
-        } else if (gamepad1.b) {
+        } else if (gamepad2.b) {
             robot.arm.motorArm.setPower(-0.1);
         } else {
             robot.arm.motorArm.setPower(0);
         }
     }
+
+//    private boolean prevaPress = true;
+//    private boolean isHover = true;
+//
+//    private void servoArmControl() {
+//        if (gamepad1.a && !prevaPress) {
+//            isHover = !isHover;
+//            robot.arm.setServoArm(isHover);
+//        }
+//        prevaPress = gamepad1.a;
+//    }
+
+//    private void servoArmControl() {
+//        if (gamepad1.a) {
+//            robot.arm.intake();
+//        } else if (gamepad1.x) {
+//            robot.arm.hover();
+//        } else if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8.0) {
+//            robot.arm.hover();
+//        }
+//    }
 
     /*
      * Code to run ONCE after the driver hits STOP
