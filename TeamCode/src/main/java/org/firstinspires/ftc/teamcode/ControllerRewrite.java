@@ -146,7 +146,9 @@ public class ControllerRewrite extends OpMode
         if (gamepad1.b) {
             robot.arm.down();
         }
-
+        if (gamepad1.a) {
+            robot.arm.intake();
+        }
         if (gamepad1.right_bumper) {
             robot.arm.drop();
         }
