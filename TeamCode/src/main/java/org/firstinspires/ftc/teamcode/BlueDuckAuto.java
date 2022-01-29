@@ -26,12 +26,10 @@ public class BlueDuckAuto extends AutoCommon{
     public void start() {
         super.start();
 
-        robot.arm.up();
+        armUp();
         driveOnHeading(12, 0.2, 0);
         turnToHeading(30, 0.2);
         driveOnHeading(5,0.2,30);
-        robot.arm.drop();
-
     }
 
     @Override

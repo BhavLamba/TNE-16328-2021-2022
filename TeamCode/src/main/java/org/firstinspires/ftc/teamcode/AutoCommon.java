@@ -137,4 +137,13 @@ public class AutoCommon extends OpMode {
         robot.driveTrain.stopMove();
     }
 
+    public void armUp() {
+        robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_TOP);
+        robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.arm.motorArm.setPower(0.2);
+        robot.arm.currentState = RobotHardware.Arm.States.UP;
+        robot.arm.elapsedTime.reset();
+    }
+
 }
+
