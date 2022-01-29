@@ -81,7 +81,6 @@ public class ControllerRewrite extends OpMode
         intakeControl();
         carouselControl();
         armControl();
-//        servoArmControl();
 //        manualArmControl();
     }
 
@@ -104,19 +103,9 @@ public class ControllerRewrite extends OpMode
     }
 
     private void intakeControl() {
-        telemetry.addData("distance", robot.distanceSensor.getDistance(DistanceUnit.CM));
-        intake.monitor(gamepad1.dpad_right);
-// may be moves to run off servo pos instead of color sensor, it gets wonky
-        if (robot.distanceSensor.getDistance(DistanceUnit.CM) > 8.0) {
+        if (robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
             robot.motorIntake.setPower(1);
-        }
-//        else if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8.0) {
-//            robot.motorIntake.setPower(0);
-//        }
-        else {
-            if (robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
-                robot.arm.hover();
-            }
+        } else {
             robot.motorIntake.setPower(0);
         }
     }
@@ -125,12 +114,10 @@ public class ControllerRewrite extends OpMode
 
     }
     private void carouselControl() {
-        if (gamepad1.right_trigger > 0.3) {
-            robot.motorCarousel.setPower(-0.075);
-        } else if (gamepad1.left_trigger > 0.3 && robot.driveTrain.motorFL.getPower() == 0) {
-            robot.motorCarousel.setPower(0.1);
-        } else if (gamepad1.left_trigger > 0.3 && gamepad1.right_trigger > 0.3) {
+        if (gamepad1.right_trigger > 0.5) {
             robot.motorCarousel.setPower(-0.1);
+        } else if (gamepad1.left_trigger > 0.5 && robot.driveTrain.motorFL.getPower() == 0) {
+            robot.motorCarousel.setPower(-0.5);
         } else {
             robot.motorCarousel.setPower(0);
         }
@@ -153,6 +140,10 @@ public class ControllerRewrite extends OpMode
             robot.arm.drop();
         }
 
+        if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8 && robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
+            robot.arm.hover();
+        }
+
         robot.arm.run();
         telemetry.addData("motorArm pos", robot.arm.motorArm.getCurrentPosition());
         telemetry.addData("servoArm pos", robot.arm.servoArm.getPosition());
@@ -170,6 +161,7 @@ public class ControllerRewrite extends OpMode
             robot.arm.motorArm.setPower(0);
         }
     }
+
 
 //    private boolean prevaPress = true;
 //    private boolean isHover = true;

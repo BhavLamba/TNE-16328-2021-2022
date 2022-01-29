@@ -83,8 +83,6 @@ public class RobotHardware {
         //parameters.loggingTag          = "IMU";
         //parameters.mode                = BNO055IMU.SensorMode.NDOF;
 
-        parameters.accelerationIntegrationAlgorithm = null;
-
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
@@ -177,14 +175,18 @@ public class RobotHardware {
 
         public void run() {
             if (currentState == States.HOVER && elapsedTime.seconds() >= 1) {
+                motorArm.setPower(0.05);
                 motorArm.setTargetPosition(MOTOR_BOTTOM);
                 servoArm.setPosition(SERVO_HOVER);
             } else if (currentState == States.UP && elapsedTime.seconds() >= 2) {
+                motorArm.setPower(0.2);
                 servoArm.setPosition(SERVO_TOP);
             } else if (currentState == States.INTAKE && elapsedTime.seconds() >= 1) {
-                motorArm.setTargetPosition(MOTOR_BOTTOM);
-                motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 motorArm.setPower(0.05);
+                motorArm.setTargetPosition(MOTOR_BOTTOM);
+                servoArm.setPosition(SERVO_BOTTOM);
+                servoFlicker.setPosition(FLICKER_INTAKE);
+                motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
         }
 //        public void run(boolean Drop) {

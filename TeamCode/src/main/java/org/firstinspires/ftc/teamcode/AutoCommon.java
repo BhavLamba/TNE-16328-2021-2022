@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -11,12 +12,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-public class AutoCommon extends LinearOpMode {
+public class AutoCommon extends OpMode {
 
     protected RobotHardware robot;
 
     @Override
-    public void runOpMode() {
+    public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 
@@ -26,19 +27,23 @@ public class AutoCommon extends LinearOpMode {
         robot = new RobotHardware(hardwareMap, true);
         initialHeading = getHeading();
 
-
-        telemetry.addData("Status", "Waiting for Vuforia...");
-        telemetry.update();
-        //initVuforia();
-
+//        waitForStart();
+//        runTime.reset();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        waitForStart();
 
+    }
+
+    @Override
+    public void start() {
         telemetry.addData("Status", "Running");
         telemetry.update();
+    }
+
+    @Override
+    public void loop() {
     }
 
     private double inchesToTicks(double inches) {
@@ -62,6 +67,7 @@ public class AutoCommon extends LinearOpMode {
         return headingDiff;
     }
 
+
     protected void drive(double distance, double power) {
         double dir = Math.signum(distance * power);
         if (dir == 0) return;
@@ -70,19 +76,19 @@ public class AutoCommon extends LinearOpMode {
 
         robot.driveTrain.resetDriveEncoders();
         robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) ;
+        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) ;
         robot.driveTrain.stopMove();
     }
 
     protected void driveOnHeading(double distance, double power, double targetHeading) {
-        double dir = Math.signum(distance * power);
+        double dir = Math.signum(-distance * power);
         if (dir == 0) return;
 
         double encoderTicks = inchesToTicks(Math.abs(distance));
 
         robot.driveTrain.resetDriveEncoders();
         robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
+        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
             robot.driveTrain.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
         }
@@ -98,7 +104,7 @@ public class AutoCommon extends LinearOpMode {
 
         robot.driveTrain.resetDriveEncoders();
         robot.driveTrain.startMove(1, 0, 0, Math.abs(minPower) * dir);
-        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
+        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
             double startRampPower = minPower + (maxPower - minPower) * (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) / rampTicks);
             double endRampPower = minPower + (maxPower - minPower) * (Math.abs(encoderTicks - robot.driveTrain.motorFL.getCurrentPosition()) / (rampTicks * 2));
@@ -117,7 +123,7 @@ public class AutoCommon extends LinearOpMode {
 
         robot.driveTrain.resetDriveEncoders();
         robot.driveTrain.startMove(0, 1, 0, Math.abs(power) * dir);
-        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
+        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
             double turnMod = getHeadingDiff(targetHeading) / 100;
             robot.driveTrain.startMove(0, Math.abs(power) * dir, Range.clip(turnMod, -0.2, 0.2), 1);
         }
@@ -125,8 +131,8 @@ public class AutoCommon extends LinearOpMode {
     }
 
     protected void turnToHeading(double targetHeading, double power) {
-        while (opModeIsActive() && Math.abs(getHeadingDiff(targetHeading)) > 6) {
-            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(getHeadingDiff(targetHeading)));
+        while (Math.abs(getHeadingDiff(targetHeading)) > 6) {
+            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(-getHeadingDiff(targetHeading)));
         }
         robot.driveTrain.stopMove();
     }
