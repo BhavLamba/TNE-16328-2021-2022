@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -8,30 +10,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @Autonomous
 public class AutoTest extends AutoCommon {
 
-    Velocity initialVelocity;
-    Position initialPosition;
-
+//    BarcodePosition barcodePosition;
 
     @Override
-    public void init() {
-        super.init();
-//        robot.imu.startAccelerationIntegration(initialPosition, initialVelocity, 100);
+    public void runOpMode() {
+        super.runOpMode();
+        runtime.reset();
+
+        telemetry.addData("Status", "Running");
+        telemetry.addData("Barcode Position", barcodePosition);
+
+        switch (barcodePosition) {
+            case Left:
+                break;
+            case Center:
+                break;
+            case Right:
+                break;
+        }
+
     }
 
-    @Override
-    public void start() {
-        super.init();
-
-        robot.arm.up();
-        driveOnHeading(12, 0.2, 0);
-        turnToHeading(30, 0.2);
-        driveOnHeading(5,0.2,30);
-        robot.arm.drop();
-    }
-
-    @Override
-    public void loop() {
-        telemetry.addData("angle", getHeading());
-        telemetry.addData("position", robot.imu.getPosition());
-    }
 }

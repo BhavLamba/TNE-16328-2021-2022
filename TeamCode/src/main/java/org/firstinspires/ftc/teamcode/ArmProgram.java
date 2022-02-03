@@ -48,8 +48,8 @@ public class ArmProgram extends OpMode
 
     @Config
     public static class Constants {
-        public static double servo_pos = 0.9;
-        public static double flicker_pos = 0.5;
+        public static double servo_pos = 0.34;
+        public static double flicker_pos = 0.6;
 
     }
 

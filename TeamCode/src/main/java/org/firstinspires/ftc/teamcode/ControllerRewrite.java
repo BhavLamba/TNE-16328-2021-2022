@@ -115,7 +115,7 @@ public class ControllerRewrite extends OpMode
     }
     private void carouselControl() {
         if (gamepad1.right_trigger > 0.5) {
-            robot.motorCarousel.setPower(-0.1);
+            robot.motorCarousel.setPower(-0.15);
         } else if (gamepad1.left_trigger > 0.5 && robot.driveTrain.motorFL.getPower() == 0) {
             robot.motorCarousel.setPower(-0.5);
         } else {
@@ -126,6 +126,7 @@ public class ControllerRewrite extends OpMode
         telemetry.addData("speed", gamepad1.right_trigger);
     }
 
+    boolean onOff = false;
     private void armControl() {
         if (gamepad1.y) {
             robot.arm.up();
@@ -140,14 +141,29 @@ public class ControllerRewrite extends OpMode
             robot.arm.drop();
         }
 
-        if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8 && robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
+        if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 7.5 && robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
             robot.arm.hover();
         }
+
+//        if (gamepad1.a && !onOff) {
+//            onOff = true;
+//        } else if (gamepad1.a && onOff) {
+//            onOff = false;
+//        }
+//        if (onOff) {
+//            robot.arm.intake();
+//        } else if (!onOff) {
+//            robot.arm.hover();
+//        }
+
+
+
 
         robot.arm.run();
         telemetry.addData("motorArm pos", robot.arm.motorArm.getCurrentPosition());
         telemetry.addData("servoArm pos", robot.arm.servoArm.getPosition());
         telemetry.addData("flicker pos", robot.arm.servoFlicker.getPosition());
+//        telemetry.addData("Distance cm", robot.distanceSensor.getDistance());
 
         telemetry.addData("state", robot.arm.currentState);
     }
@@ -162,27 +178,6 @@ public class ControllerRewrite extends OpMode
         }
     }
 
-
-//    private boolean prevaPress = true;
-//    private boolean isHover = true;
-//
-//    private void servoArmControl() {
-//        if (gamepad1.a && !prevaPress) {
-//            isHover = !isHover;
-//            robot.arm.setServoArm(isHover);
-//        }
-//        prevaPress = gamepad1.a;
-//    }
-
-//    private void servoArmControl() {
-//        if (gamepad1.a) {
-//            robot.arm.intake();
-//        } else if (gamepad1.x) {
-//            robot.arm.hover();
-//        } else if (robot.distanceSensor.getDistance(DistanceUnit.CM) < 8.0) {
-//            robot.arm.hover();
-//        }
-//    }
 
     /*
      * Code to run ONCE after the driver hits STOP

@@ -98,21 +98,21 @@ public class RobotHardware {
         public States currentState = States.INTAKE;
         ElapsedTime elapsedTime;
 
-        public static int MOTOR_TOP_HUB_POSITION = 615;
+        public static int MOTOR_TOP_HUB_POSITION = 590;
         public static int MOTOR_BOT_HUB_POSITION = 835;
         public int MOTOR_TOP = MOTOR_TOP_HUB_POSITION;
         public static int MOTOR_BOTTOM = 0;
 
 
-        public static double SERVO_TOP_HUB_POSITION = 0.7;
-        public static double SERVO_BOT_HUB_POSITION = 0.15;
+        public static double SERVO_TOP_HUB_POSITION = 0.85;
+        public static double SERVO_BOT_HUB_POSITION = 0.05;
         public double SERVO_TOP = SERVO_TOP_HUB_POSITION;
-        public static double SERVO_BOTTOM = 0.33;
-        public static double SERVO_HOVER = 0.6;
+        public static double SERVO_BOTTOM = 0.4;
+        public static double SERVO_HOVER = 0.73;
 
-        public static double SERVO_DROP_OFFSET = 0.025;
+        public static double SERVO_DROP_OFFSET = 0.15;
 
-        public static double FLICKER_INTAKE = 0.51;
+        public static double FLICKER_INTAKE = 0.53;
         public static double FLICKER_CLOSED = 0.6;
         public static double FLICKER_PUSH = 0.8;
 
@@ -138,7 +138,7 @@ public class RobotHardware {
             if (currentState == States.HOVER) {
                 motorArm.setTargetPosition(MOTOR_TOP);
                 motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                motorArm.setPower(0.2);
+                motorArm.setPower(0.5);
                 currentState = States.UP;
                 elapsedTime.reset();
             }

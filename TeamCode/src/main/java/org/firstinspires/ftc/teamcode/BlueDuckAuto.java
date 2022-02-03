@@ -11,30 +11,17 @@ public class BlueDuckAuto extends AutoCommon{
     double POWER = 0.2;
 
     @Override
-    public void init() {
-        super.init();
-//        robot.imu.startAccelerationIntegration(new Position(), new Velocity(), 100);
-//        robot.arm.hover();
-//        robot.arm.up();
-//        driveOnHeading(12, 0.2, 0);
-//        turnToHeading(30, 0.2);
-//        driveOnHeading(5,0.2,30);
-//        robot.arm.drop();
-    }
+    public void runOpMode() {
+        super.runOpMode();
 
-    @Override
-    public void start() {
-        super.start();
-
-        armUp();
+        robot.arm.servoArm.setPosition(robot.arm.SERVO_HOVER);
+        robot.arm.up();
+        sleep(5000);
         driveOnHeading(12, 0.2, 0);
         turnToHeading(30, 0.2);
         driveOnHeading(5,0.2,30);
+        robot.arm.drop();
     }
 
-    @Override
-    public void loop() {
-        telemetry.addData("angle", getHeading());
-//        telemetry.addData("position", robot.imu.getPosition());
-    }
 }
+
