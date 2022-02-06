@@ -15,20 +15,36 @@ public class AutoTest extends AutoCommon {
     @Override
     public void runOpMode() {
         super.runOpMode();
-        runtime.reset();
 
-        telemetry.addData("Status", "Running");
-        telemetry.addData("Barcode Position", barcodePosition);
+        telemetry.addData("AfterWaitforSignal",99);
+        telemetry.update();
 
-        switch (barcodePosition) {
-            case Left:
-                break;
-            case Center:
-                break;
-            case Right:
-                break;
-        }
+//            armUp(3);
+//            driveOnHeading(5,0.1,0);
+        driveOnHeading(15, 0.3, 0);
+        sleep(1000);
+        turnToHeading(90,0.3);
+        sleep(1000);
+        driveOnHeading(15,0.3,90);
+        sleep(1000);
+        turnToHeading(180,0.3);
+        sleep(10000);
+//            turnToHeading(90, 0.5);
+//            driveOnHeading(10, 0.5, 90);
+////            strafeOnHeading(20, 1, 90);
+//            turnToHeading(0,0.5);
+//        driveOnHeading(5,0.5,0);
+//        turnToHeading(90,0.5);
+//        driveOnHeading(10,0.5,90);
+//        driveOnHeading(5,0.5,0);
+//        turnToHeading(90,0.5);
+//        driveOnHeading(10,0.5,90);
+//        strafeOnHeading(20,-.5,90);
+////        moveArmUp(320);
+////        robot.arm.motorArm.setPower(-0.01);
+//        sleep(500000);
+
 
     }
-
 }
+

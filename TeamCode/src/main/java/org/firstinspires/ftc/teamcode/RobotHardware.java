@@ -102,19 +102,21 @@ public class RobotHardware {
         public static int MOTOR_BOT_HUB_POSITION = 835;
         public int MOTOR_TOP = MOTOR_TOP_HUB_POSITION;
         public static int MOTOR_BOTTOM = 0;
-
+        public static int MOTOR_MID_HUB_POSITION = 700;
+        public static int MOTOR_LOW_HUB_POSITION = 750;
 
         public static double SERVO_TOP_HUB_POSITION = 0.85;
         public static double SERVO_BOT_HUB_POSITION = 0.05;
         public double SERVO_TOP = SERVO_TOP_HUB_POSITION;
         public static double SERVO_BOTTOM = 0.4;
-        public static double SERVO_HOVER = 0.73;
+        public static double SERVO_HOVER = 0.71; //.73
 
-        public static double SERVO_DROP_OFFSET = 0.15;
+        public static double SERVO_DROP_OFFSET = 0.01;
 
-        public static double FLICKER_INTAKE = 0.53;
-        public static double FLICKER_CLOSED = 0.6;
+        public static double FLICKER_INTAKE = 0.45; //.53
+        public static double FLICKER_CLOSED = 0.56; // 0.6
         public static double FLICKER_PUSH = 0.8;
+        public static double FLICKER_TOP = 0.62; //.53
 
         public Arm(HardwareMap hardwareMap) {
             motorArm = hardwareMap.get(DcMotor.class, "motorArm");
@@ -126,10 +128,10 @@ public class RobotHardware {
 
             servoArm = hardwareMap.get(Servo.class, "servoArm");
             servoArm.setDirection(Servo.Direction.REVERSE);
-            servoArm.setPosition(SERVO_BOTTOM);
+            servoArm.setPosition(SERVO_HOVER);
 
             servoFlicker = hardwareMap.get(Servo.class, "servoFlicker");
-            servoFlicker.setPosition(FLICKER_INTAKE);
+            servoFlicker.setPosition(FLICKER_CLOSED);
 
             elapsedTime = new ElapsedTime();
         }
@@ -154,10 +156,13 @@ public class RobotHardware {
         public void intake() {
             currentState = States.INTAKE;
         }
+
+
         public void drop() {
             if (currentState == States.UP) {
                 servoArm.setPosition(SERVO_TOP + SERVO_DROP_OFFSET);
                 servoFlicker.setPosition(FLICKER_PUSH);
+                currentState = States.DROP;
             }
         }
 
@@ -177,16 +182,20 @@ public class RobotHardware {
             if (currentState == States.HOVER && elapsedTime.seconds() >= 1) {
                 motorArm.setPower(0.05);
                 motorArm.setTargetPosition(MOTOR_BOTTOM);
+                motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 servoArm.setPosition(SERVO_HOVER);
             } else if (currentState == States.UP && elapsedTime.seconds() >= 2) {
                 motorArm.setPower(0.2);
                 servoArm.setPosition(SERVO_TOP);
+                servoFlicker.setPosition(FLICKER_TOP);
             } else if (currentState == States.INTAKE && elapsedTime.seconds() >= 1) {
                 motorArm.setPower(0.05);
                 motorArm.setTargetPosition(MOTOR_BOTTOM);
                 servoArm.setPosition(SERVO_BOTTOM);
                 servoFlicker.setPosition(FLICKER_INTAKE);
                 motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            } else if (currentState == States.DROP && elapsedTime.seconds() >= .5) {
+                currentState = States.UP;
             }
         }
 //        public void run(boolean Drop) {
@@ -220,6 +229,7 @@ public class RobotHardware {
             INTAKE,
             HOVER,
             UP,
+            DROP
         }
 
         enum Level {

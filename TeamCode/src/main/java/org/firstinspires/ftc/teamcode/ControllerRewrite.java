@@ -103,24 +103,40 @@ public class ControllerRewrite extends OpMode
     }
 
     private void intakeControl() {
-        if (robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
-            robot.motorIntake.setPower(1);
+        if (gamepad1.dpad_left || gamepad2.dpad_left) {
+            robot.motorIntake.setPower(-1);
         } else {
-            robot.motorIntake.setPower(0);
+            if (robot.arm.currentState == RobotHardware.Arm.States.INTAKE) {
+                robot.motorIntake.setPower(1);
+            } else {
+                robot.motorIntake.setPower(0);
+            }
         }
     }
 
     private void newIntakeControl() {
 
     }
+
+    double carouselMultiplier = -1;
+
     private void carouselControl() {
-        if (gamepad1.right_trigger > 0.5) {
-            robot.motorCarousel.setPower(-0.15);
-        } else if (gamepad1.left_trigger > 0.5 && robot.driveTrain.motorFL.getPower() == 0) {
-            robot.motorCarousel.setPower(-0.5);
+        if (gamepad1.left_trigger > 0.5 && robot.driveTrain.motorFL.getPower() == 0 && gamepad1.right_trigger > 0.5) {
+            robot.motorCarousel.setPower(1 * carouselMultiplier);
+        } else if (gamepad1.right_trigger > 0.5) {
+            robot.motorCarousel.setPower(0.65 * carouselMultiplier);
         } else {
             robot.motorCarousel.setPower(0);
         }
+
+        if (gamepad2.right_trigger > 0) {
+            carouselMultiplier = 1;
+        }
+        if (gamepad2.right_bumper) {
+            carouselMultiplier = -1;
+        }
+
+        telemetry.addData("carosel direction", carouselMultiplier);
 
 //        robot.motorCarousel.setPower(-gamepad1.right_trigger);
         telemetry.addData("speed", gamepad1.right_trigger);
@@ -128,6 +144,11 @@ public class ControllerRewrite extends OpMode
 
     boolean onOff = false;
     private void armControl() {
+        if (gamepad2.y) {
+            robot.arm.motorArm.setPower(0.2);
+        } else         if (gamepad2.b) {
+            robot.arm.motorArm.setPower(-0.2);
+        }
         if (gamepad1.y) {
             robot.arm.up();
         }

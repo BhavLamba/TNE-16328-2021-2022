@@ -22,6 +22,7 @@ public class AutoCommon extends LinearOpMode {
     protected RobotHardware robot;
     protected BarcodePosition barcodePosition;
     protected ElapsedTime runtime = new ElapsedTime();
+//    protected boolean opMode = false;
 
     @Override
     public void runOpMode() {
@@ -33,13 +34,19 @@ public class AutoCommon extends LinearOpMode {
 
         robot = new RobotHardware(hardwareMap, true);
         initialHeading = getHeading();
-
-        telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         initializeCamera();
         runCamera();
         runtime.reset();
+        telemetry.update();
+
+//        opMode = true;
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        waitForStart();
+        telemetry.update();
 
         telemetry.addData("Status", "Running");
         telemetry.addData("Barcode Position", barcodePosition);
@@ -173,6 +180,7 @@ public class AutoCommon extends LinearOpMode {
     }
 
     protected void driveOnHeading(double distance, double power, double targetHeading) {
+        targetHeading = -targetHeading;
         double dir = Math.signum(-distance * power);
         if (dir == 0) return;
 
@@ -180,12 +188,30 @@ public class AutoCommon extends LinearOpMode {
 
         robot.driveTrain.resetDriveEncoders();
         robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
-        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
+        while (Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks && opModeIsActive()) {
+            telemetry.addData("current heading", getHeading());
             double turnMod = getHeadingDiff(targetHeading) / 100;
+            telemetry.addData("turn mod", turnMod);
             robot.driveTrain.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
+            telemetry.update();
         }
         robot.driveTrain.stopMove();
     }
+
+//    protected void driveOnHeading(double distance, double power, double targetHeading) {
+//        double dir = Math.signum(distance * power);
+//        if (dir == 0) return;
+//
+//        double encoderTicks = inchesToTicks(Math.abs(distance));
+//
+//        robot.driveTrain.resetDriveEncoders();
+//        robot.driveTrain.startMove(1, 0, 0, Math.abs(power) * dir);
+//        while (opModeIsActive() && Math.abs(robot.driveTrain.motorFL.getCurrentPosition()) < encoderTicks) {
+//            double turnMod = getHeadingDiff(targetHeading) / 100;
+//            robot.driveTrain.startMove(Math.abs(power) * dir, 0, Range.clip(turnMod, -0.2, 0.2), 1);
+//        }
+//        robot.driveTrain.stopMove();
+//    }
 
     protected void driveOnHeadingRamp(double driveDistance, double minPower, double maxPower, double rampDistance, double targetHeading) {
         double dir = Math.signum(driveDistance);
@@ -222,18 +248,68 @@ public class AutoCommon extends LinearOpMode {
         robot.driveTrain.stopMove();
     }
 
+    protected void timeDriveForwardBack(long time, double power) {
+        robot.driveTrain.motorFR.setPower(power);
+        robot.driveTrain.motorFL.setPower(power);
+        robot.driveTrain.motorBL.setPower(power);
+        robot.driveTrain.motorBR.setPower(power);
+        sleep(time);
+        robot.driveTrain.stopMove();
+    }
+
+    protected void timeStrafe(long time, double power)  {
+        robot.driveTrain.motorFR.setPower(-power);
+        robot.driveTrain.motorFL.setPower(power);
+        robot.driveTrain.motorBL.setPower(-power);
+        robot.driveTrain.motorBR.setPower(power);
+        sleep(time);
+        robot.driveTrain.stopMove();
+    }
+
     protected void turnToHeading(double targetHeading, double power) {
-        while (Math.abs(getHeadingDiff(targetHeading)) > 6) {
+        while ( Math.abs(getHeadingDiff(targetHeading)) > 6) { // added opMode=true &&
             robot.driveTrain.startMove(0, 0, 1, power * Math.signum(-getHeadingDiff(targetHeading)));
         }
         robot.driveTrain.stopMove();
     }
 
-    public void armUp() {
-        robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_TOP);
+//    protected void turnToHeading(double targetHeading, double power) {
+//        while (opModeIsActive() && Math.abs(getHeadingDiff(targetHeading)) > 6) {
+//            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(getHeadingDiff(targetHeading)));
+//        }
+//        robot.driveTrain.stopMove();
+//    }
+
+    public void armUp(int towerPos) {
+        if (opModeIsActive()) {
+            if (towerPos == 1) {
+                robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_TOP);
+                robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.arm.motorArm.setPower(0.2);
+                robot.arm.currentState = RobotHardware.Arm.States.UP;
+                robot.arm.elapsedTime.reset();
+            } else if (towerPos == 2) {
+                robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_MID_HUB_POSITION);
+                robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.arm.motorArm.setPower(0.2);
+                robot.arm.currentState = RobotHardware.Arm.States.UP;
+                robot.arm.elapsedTime.reset();
+            } else if (towerPos == 3) {
+                robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_LOW_HUB_POSITION);
+                robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.arm.motorArm.setPower(0.2);
+                robot.arm.currentState = RobotHardware.Arm.States.UP;
+                robot.arm.elapsedTime.reset();
+            }
+        }
+    }
+    public void armDown() {
+        robot.arm.servoFlicker.setPosition(robot.arm.FLICKER_CLOSED);
+        robot.arm.servoArm.setPosition(robot.arm.SERVO_HOVER);
+        robot.arm.motorArm.setTargetPosition(robot.arm.MOTOR_BOTTOM);
         robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.arm.motorArm.setPower(0.2);
-        robot.arm.currentState = RobotHardware.Arm.States.UP;
+        robot.arm.motorArm.setPower(0.05);
+        robot.arm.currentState = RobotHardware.Arm.States.INTAKE;
         robot.arm.elapsedTime.reset();
     }
 
@@ -242,6 +318,84 @@ public class AutoCommon extends LinearOpMode {
         Center,
         Right
     }
+
+    protected void moveArmDown(double ticksToMove) {
+        robot.arm.motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        while (opModeIsActive() && Math.abs(robot.arm.motorArm.getCurrentPosition()) < Math.abs(ticksToMove)) {
+            if (Math.abs(robot.arm.motorArm.getCurrentPosition()) < Math.abs(ticksToMove - -0.2)) {
+                robot.arm.motorArm.setPower(-0.2);
+            } else {
+                robot.arm.motorArm.setPower(-0.2);
+            }
+            telemetry.addData("MotorPos", robot.arm.motorArm.getCurrentPosition());
+            telemetry.addData("TickLeft", Math.abs(ticksToMove) - Math.abs(robot.arm.motorArm.getCurrentPosition()));
+            telemetry.update();
+        }
+        robot.arm.motorArm.setPower(0);
+    }
+
+    protected void moveArmUp(double ticksToMove) {
+        robot.arm.motorArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.arm.motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.arm.motorArm.setPower(0.3);
+        while (opModeIsActive() && Math.abs(robot.arm.motorArm.getCurrentPosition()) < Math.abs(ticksToMove)) {
+            telemetry.addData("MotorPos", robot.arm.motorArm.getCurrentPosition());
+            telemetry.addData("TickLeft", Math.abs(ticksToMove) - Math.abs(robot.arm.motorArm.getCurrentPosition()));
+            telemetry.update();
+        }
+        robot.arm.motorArm.setPower(0);
+    }
+
+//    public void forward(int distanceInches) {
+//        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() +(int)(distanceInches*TICKS_PER_INCH));
+//        frontRight.setTargetPosition(frontRight.getCurrentPosition() +(int)(distanceInches*TICKS_PER_INCH));
+//        backRight.setTargetPosition(backRight.getCurrentPosition() +(int)(distanceInches*TICKS_PER_INCH));
+//        backLeft.setTargetPosition(backLeft.getCurrentPosition() + (int)(distanceInches*TICKS_PER_INCH));
+//
+//        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        frontRight.setVelocity(driveVelocity);
+//        frontLeft.setVelocity(driveVelocity);
+//        backLeft.setVelocity(driveVelocity);
+//        backRight.setVelocity(driveVelocity);
+//
+//        while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy()) { }
+//
+//        frontLeft.setVelocity(0);
+//        frontRight.setVelocity(0);
+//        backLeft.setVelocity(0);
+//        backRight.setVelocity(0);
+//    }
+
+
+//    public void turnRight (int distanceInches){
+//        robot.driveTrain.motorFL.setTargetPosition( robot.driveTrain.motorFL.getCurrentPosition() +(int)(distanceInches*TICKS_PER_INCH));
+//        robot.driveTrain.motorFR.setTargetPosition( robot.driveTrain.motorFR.getCurrentPosition() +(int)(-distanceInches*TICKS_PER_INCH));
+//        robot.driveTrain.motorBR.setTargetPosition( robot.driveTrain.motorBR.getCurrentPosition() +(int)(-distanceInches*TICKS_PER_INCH));
+//        robot.driveTrain.motorBL.setTargetPosition( robot.driveTrain.motorBL.getCurrentPosition() + (int)(distanceInches*TICKS_PER_INCH));
+//
+//        robot.driveTrain.motorFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.driveTrain.motorFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.driveTrain.motorBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.driveTrain.motorBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        robot.driveTrain.motorFL.setVelocity(driveVelocity);
+//        robot.driveTrain.motorFR.setVelocity(driveVelocity);
+//        robot.driveTrain.motorBL.setVelocity(driveVelocity);
+//        robot.driveTrain.motorBR.setVelocity(driveVelocity);
+//
+//        while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy()) { }
+//
+//        frontLeft.setVelocity(0);
+//        frontRight.setVelocity(0);
+//        backLeft.setVelocity(0);
+//        backRight.setVelocity(0);
+//
+//    }
 
 }
 
