@@ -22,7 +22,6 @@ public class AutoCommon extends LinearOpMode {
     protected RobotHardware robot;
     protected BarcodePosition barcodePosition;
     protected ElapsedTime runtime = new ElapsedTime();
-//    protected boolean opMode = false;
 
     @Override
     public void runOpMode() {
@@ -41,7 +40,6 @@ public class AutoCommon extends LinearOpMode {
         runtime.reset();
         telemetry.update();
 
-//        opMode = true;
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -267,8 +265,8 @@ public class AutoCommon extends LinearOpMode {
     }
 
     protected void turnToHeading(double targetHeading, double power) {
-        while ( Math.abs(getHeadingDiff(targetHeading)) > 6) { // added opMode=true &&
-            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(-getHeadingDiff(targetHeading)));
+        while (opModeIsActive() && Math.abs(getHeadingDiff(targetHeading)) > 6) { // added opMode=true &&
+            robot.driveTrain.startMove(0, 0, 1, power * Math.signum(getHeadingDiff(targetHeading)));
         }
         robot.driveTrain.stopMove();
     }
